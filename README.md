@@ -1,16 +1,40 @@
-# triple_t
+#Triple-T: A Tic-Tac-Toe Game in Flutter
+Triple-T is a fun and challenging Tic-Tac-Toe game built with Flutter. It offers three difficulty levels to test your skills and keep you entertained.
 
-A new Flutter project.
+Features:
+Play against the AI with three difficulty levels: Easy, Medium, and Hard.
+Beautiful and user-friendly UI built with Flutter.
+Single-player gameplay.
+Clean and well-structured code.
+Getting Started:
+Clone the repository:
 
-## Getting Started
+bash
+Copy code
+git clone https://github.com/your-username/triple-t.git
+Note: Use code with caution.
 
-This project is a starting point for a Flutter application.
+Install dependencies:
 
-A few resources to get you started if this is your first Flutter project:
+bash
+Copy code
+cd triple-t
+flutter pub get
+Note: Use code with caution.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Run the app:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+bash
+Copy code
+flutter run
+Note: Use code with caution.
+
+Difficulty Levels:
+Easy: The AI will make random moves.
+Medium: The AI will try to block your winning moves and make winning moves itself (basic strategy).
+Hard: The AI will implement a more advanced strategy to maximize its chances of winning.
+Contributing:
+We welcome contributions to this project! Feel free to fork the repository and submit pull requests with your improvements or new features.
+
+License:
+This project is licensed under the MIT License. See the LICENSE file for details.
