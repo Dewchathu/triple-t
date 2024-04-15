@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:triple_t/Screens/entry_screen.dart';
-import 'package:triple_t/screens/player_selection.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:triple_t/screens/splash_screen.dart';
 
 void main() {
+  GoogleFonts.config.allowRuntimeFetching = false;
   runApp(const MyApp());
 }
 

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 class Difficulty {
   final String playerOne;
@@ -45,52 +43,85 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.difficulty.name),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Stack(
+        title: Row(
           children: [
-            GridView.builder(
-                itemCount: widget.difficulty.itemCount,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: widget.difficulty.crossAxisCount
-                ),
-                itemBuilder: (context, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: GestureDetector(
-                      onTap: () {
-                        if (!isSelected[index]) {
-                          setState(() {
-                            isSelected[index] = true;
-                            playerSelection[index] = currentPlayer == 1 ? 'O' : 'X';
-                            currentPlayer = currentPlayer == 1 ? 2 : 1;
-                            tapCount++;
+            Text(widget.difficulty.name),
+            const Spacer(),
+            currentPlayer == 1
+                ? Text('Current Player: ${widget.difficulty.playerOne}', style: const TextStyle(fontSize: 22),)
+                :Text('Current Player: ${widget.difficulty.playerTwo}',style: const TextStyle(fontSize: 22),),
+          ],
+        ),
+        backgroundColor: Colors.blue,
+      ),
+      backgroundColor: Colors.blue,
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+            gradient: LinearGradient(
+                colors: [Colors.blue, Colors.purple],
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft
+            )
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Stack(
+              children: [
+                GridView.builder(
+                    itemCount: widget.difficulty.itemCount,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: widget.difficulty.crossAxisCount
+                    ),
+                    itemBuilder: (context, int index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: GestureDetector(
+                          onTap: () {
+                            if (!isSelected[index]) {
+                              setState(() {
+                                isSelected[index] = true;
+                                playerSelection[index] = currentPlayer == 1 ? 'O' : 'X';
+                                currentPlayer = currentPlayer == 1 ? 2 : 1;
+                                tapCount++;
 
 
-                          });
-                        }
-                      },
-                      child: Container(
-                        height: 50,
-                        width: 50,
-                        color: Colors.green,
-                        child: Center(
-                          child: Text(
-                            playerSelection[index],
-                            style: const TextStyle(fontSize: 25),
+                              });
+                            }
+                          },
+                          child: Container(
+                            height: 50,
+                            width: 50,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF303030),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.white.withOpacity(0.2),
+                                  blurRadius: 1,
+                                  spreadRadius: 0,
+                                  offset: const Offset(0,0),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Text(
+                                playerSelection[index],
+                                style: const TextStyle(fontSize: 25),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  );
-                }),
-            if (checkWinner())
-              Center(child: WinnerDialog(message: '${currentPlayer == 1 ? widget.difficulty.playerTwo : widget.difficulty.playerOne} Wins!', isDraw: false, image: 'assets/images/win.png',),),
-            if(!checkWinner() && tapCount == (widget.difficulty.itemCount-1))
-              const Center(child: WinnerDialog(message: 'It\'s Draw', isDraw: true, image: 'assets/images/refresh.png',),),
-          ],
+                      );
+                    }),
+                if (checkWinner())
+                  Center(child: WinnerDialog(message: '${currentPlayer == 1 ? widget.difficulty.playerTwo : widget.difficulty.playerOne} Wins!', isDraw: false, image: 'assets/images/win.png',),),
+                if(!checkWinner() && tapCount == (widget.difficulty.itemCount-1))
+                  const Center(child: WinnerDialog(message: 'It\'s Draw', isDraw: true, image: 'assets/images/refresh.png',),),
+              ],
+            ),
+          ),
         ),
       ),
     );
