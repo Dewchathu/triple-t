@@ -1,4 +1,4 @@
-package com.example.triple_t
+package com.dew.triple_t
 
 import io.flutter.embedding.android.FlutterActivity
 
