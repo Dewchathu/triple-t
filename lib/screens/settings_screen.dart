@@ -4,32 +4,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:triple_t/actions/moveto_next_screen.dart';
+import 'package:triple_t/screens/entry_screen.dart';
 import 'package:triple_t/screens/game_mode_screen.dart';
 import 'package:triple_t/screens/player_selection.dart';
-import 'package:triple_t/screens/settings_screen.dart';
 import 'package:triple_t/widgets/custom_button.dart';
 
 import '../widgets/exit_dialog.dart';
 import 'home_screen.dart';
 
-class EntryScreen extends StatefulWidget {
-  const EntryScreen({Key? key}) : super(key: key);
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({Key? key}) : super(key: key);
 
   @override
-  State<EntryScreen> createState() => _EntryScreenState();
+  State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 
-class _EntryScreenState extends State<EntryScreen> {
-  bool isMusicPlaying = false;
-
-  @override
-  void initState() {
-    super.initState();
-    FlameAudio.bgm.initialize();
-    FlameAudio.bgm.play('music.ogg');
-  }
-
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool isSoundOn = true;
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
@@ -54,19 +46,15 @@ class _EntryScreenState extends State<EntryScreen> {
                 children: [
                   SizedBox(height: size.height/10),
                   CustomButton(
-                    text: 'New Game',
+                    text: isSoundOn?'Sound Off':'Sound On',
                     onPressed: (){
-                      moveToNextScreen(context, const PlayerSelection());
-                    },
-                    bottomColor: const Color(0xFF0c3363),
-                    darkColor: const Color(0xFF0a60c9),
-                    lightColor: const Color(0xFF4a9bff),
-                  ),
-                  SizedBox(height: size.height/9),
-                  CustomButton(
-                    text: 'Settings',
-                    onPressed: (){
-                      moveToNextScreen(context, const SettingsScreen());
+                      isSoundOn
+                      ?FlameAudio.bgm.pause()
+                      :FlameAudio.bgm.play('music.ogg');
+
+                      setState(() {
+                        isSoundOn != isSoundOn;
+                      });
                     },
                     bottomColor: const Color(0xFF0c3363),
                     darkColor: const Color(0xFF0a60c9),
@@ -74,8 +62,10 @@ class _EntryScreenState extends State<EntryScreen> {
                   ),
                   SizedBox(height: size.height/10),
                   GestureDetector(
-                    onTap: () => _onBackPressed(context),
-                    child: const Center(child: Text("Exit", style: TextStyle(fontSize: 20),)),
+                    onTap: (){
+                      moveToNextScreen(context, const EntryScreen());
+                    },
+                    child: Image.asset('assets/images/back.png', height: 40),
                   ),
                 ],
               ),
