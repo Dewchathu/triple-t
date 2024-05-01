@@ -6,7 +6,7 @@ import 'package:triple_t/widgets/custom_button.dart';
 import 'package:triple_t/widgets/custom_form_field.dart';
 
 import '../widgets/exit_dialog.dart';
-import 'entry_screen.dart';
+import 'game_mode_screen.dart';
 
 class PlayerSelection extends StatefulWidget {
   const PlayerSelection({Key? key}) : super(key: key);
@@ -96,7 +96,7 @@ class _PlayerSelectionState extends State<PlayerSelection> {
                               text:  'Start',
                               onPressed: (){
                                 if (formKey.currentState?.validate() ?? false) {
-                                  moveToNextScreen(context, EntryScreen(playerOne: playerOne.text, playerTwo: playerTwo.text,));
+                                  moveToNextScreen(context, GameModeScreen(playerOne: playerOne.text, playerTwo: playerTwo.text,));
 
                                 }
                               },
