@@ -17,16 +17,10 @@ Triple T is designed for accessibility and enjoyment for players of all ages. Wi
 - **Easy Controls:** Tap and play with straightforward controls.
 - **Local Multiplayer:** Compete with friends in a fun and interactive pass-and-play mode.
 
-## Screenshots
+## Images
 
-![Main Menu](screenshots/TripleT.png)
-*Main Menu*
-
-![Single Player Mode](screenshots/single_player.png)
-*Single Player Mode*
-
-![Local Multiplayer Mode](screenshots/local_multiplayer.png)
-*Local Multiplayer Mode*
+![Featured Image](screenshots/TripleT.png)
+*Featured Image*
 
 ## Getting Started
 
