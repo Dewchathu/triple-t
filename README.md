@@ -33,13 +33,13 @@ Triple T is designed for accessibility and enjoyment for players of all ages. Wi
 1. **Clone the Repository:**
 
     ```bash
-    git clone https://github.com/your-username/Triple-T.git
+    git clone https://github.com/Dewchathu/triple-t.git
     cd Triple-T
     ```
 
 2. **Open the Project:**
 
-    - Open the project in your development environment (e.g., Unity, Android Studio).
+    - Open the project in your development environment (e.g. Android Studio).
 
 3. **Build and Run:**
 
@@ -69,8 +69,8 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-Your Name - [@YourTwitterHandle](https://twitter.com/YourTwitterHandle) - youremail@example.com
+Your Name - [Likedin](https://www.linkedin.com/in/chathura-devinda-73ab25229) - chathuradevinda.bc@gmail.com
 
-Project Link: [https://github.com/your-username/Triple-T](https://github.com/your-username/Triple-T)
+Project Link: [https://github.com/Dewchathu/triple-t.git](https://github.com/Dewchathu/triple-t.git)
 
 #GameDevelopment #TicTacToe #TripleT #FunGame #Multiplayer
