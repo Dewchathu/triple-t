@@ -19,7 +19,7 @@ Triple T is designed for accessibility and enjoyment for players of all ages. Wi
 
 ## Screenshots
 
-![Main Menu](screenshots/main_menu.png)
+![Main Menu](screenshots/TripleT.png)
 *Main Menu*
 
 ![Single Player Mode](screenshots/single_player.png)
