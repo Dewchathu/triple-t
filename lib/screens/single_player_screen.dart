@@ -9,9 +9,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:triple_t/providers/sound_provider.dart';
 import 'package:triple_t/widgets/custom_button.dart';
+import 'package:triple_t/widgets/game_logic.dart';
 import 'package:triple_t/widgets/wavy_gradient_painter.dart';
-
-import '../widgets/game_logic.dart';
 
 class Difficulty {
   final String playerOne;
@@ -46,7 +45,7 @@ class _SinglePlayerScreenState extends State<SinglePlayerScreen>
   List<bool> isSelected = [];
   List<String> playerSelection = [];
   int currentPlayer = 1; // 1 for player, 2 for computer
-  bool hasWinner = false;
+  String? winner; // Track winner: 'player', 'computer', or null
   int tapCount = 0;
   bool isComputing = false;
   late AnimationController _titleController;
@@ -58,16 +57,7 @@ class _SinglePlayerScreenState extends State<SinglePlayerScreen>
     super.initState();
     resetGame();
     GameLogic.validateBoard(playerSelection, widget.difficulty.crossAxisCount);
-    final soundProvider = Provider.of<SoundProvider>(context, listen: false);
-    if (soundProvider.isMusicOn && !FlameAudio.bgm.isPlaying) {
-      FlameAudio.bgm
-          .play('music.ogg', volume: soundProvider.musicVolume)
-          .catchError((e) {
-        print('Error playing theme.mp3: $e');
-      });
-    }
 
-    // Title animation
     _titleController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -76,7 +66,6 @@ class _SinglePlayerScreenState extends State<SinglePlayerScreen>
       CurvedAnimation(parent: _titleController, curve: Curves.easeInOut),
     );
 
-    // Wave animation
     _waveController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 5),
@@ -87,10 +76,6 @@ class _SinglePlayerScreenState extends State<SinglePlayerScreen>
   void dispose() {
     _titleController.dispose();
     _waveController.dispose();
-    // Only pause music if exiting the app, not on navigation
-    if (!Navigator.of(context).canPop()) {
-      FlameAudio.bgm.pause();
-    }
     super.dispose();
   }
 
@@ -99,7 +84,7 @@ class _SinglePlayerScreenState extends State<SinglePlayerScreen>
       isSelected = List.filled(widget.difficulty.itemCount, false);
       playerSelection = List.filled(widget.difficulty.itemCount, '');
       currentPlayer = 1;
-      hasWinner = false;
+      winner = null;
       tapCount = 0;
       isComputing = false;
     });
@@ -107,8 +92,9 @@ class _SinglePlayerScreenState extends State<SinglePlayerScreen>
   }
 
   Future<void> computerMove() async {
-    if (hasWinner || tapCount >= widget.difficulty.itemCount || isComputing)
-      return;
+    if (winner != null ||
+        tapCount >= widget.difficulty.itemCount ||
+        isComputing) return;
 
     setState(() {
       isComputing = true;
@@ -169,12 +155,14 @@ class _SinglePlayerScreenState extends State<SinglePlayerScreen>
     if (GameLogic.checkWinner(playerSelection, widget.difficulty.crossAxisCount,
         marksToWin: 3)) {
       setState(() {
-        hasWinner = true;
+        winner = currentPlayer == 1 ? 'computer' : 'player';
       });
       if (soundProvider.isEffectsOn) {
-        FlameAudio.play('win.mp3', volume: soundProvider.effectsVolume)
+        FlameAudio.play(winner == 'player' ? 'win.mp3' : 'lost.mp3',
+                volume: soundProvider.effectsVolume)
             .catchError((e) {
-          print('Error playing win.mp3: $e');
+          print(
+              'Error playing ${winner == 'player' ? 'win.mp3' : 'lost.mp3'}: $e');
         });
       }
     } else if (GameLogic.checkDraw(playerSelection)) {
@@ -397,7 +385,6 @@ class _SinglePlayerScreenState extends State<SinglePlayerScreen>
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // Wavy Gradient Background
           AnimatedBuilder(
             animation: _waveController,
             builder: (context, child) {
@@ -407,11 +394,9 @@ class _SinglePlayerScreenState extends State<SinglePlayerScreen>
               );
             },
           ),
-          // Content
           Column(
             children: [
               SizedBox(height: size.height * 0.12),
-              // Animated Title
               AnimatedBuilder(
                 animation: _titleAnimation,
                 builder: (context, child) {
@@ -434,7 +419,6 @@ class _SinglePlayerScreenState extends State<SinglePlayerScreen>
                 },
               ),
               SizedBox(height: size.height * 0.04),
-              // Game Board
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(size.width * 0.05),
@@ -453,7 +437,7 @@ class _SinglePlayerScreenState extends State<SinglePlayerScreen>
                         onTap: isComputing ||
                                 isSelected[index] ||
                                 currentPlayer != 1 ||
-                                hasWinner
+                                winner != null
                             ? null
                             : () {
                                 HapticFeedback.lightImpact();
@@ -474,7 +458,7 @@ class _SinglePlayerScreenState extends State<SinglePlayerScreen>
                                   });
                                 }
                                 _checkGameState();
-                                if (!hasWinner &&
+                                if (winner == null &&
                                     tapCount < widget.difficulty.itemCount) {
                                   computerMove();
                                 }
@@ -486,16 +470,14 @@ class _SinglePlayerScreenState extends State<SinglePlayerScreen>
               ),
             ],
           ),
-          // Winner/Draw Dialog
-          if (hasWinner || GameLogic.checkDraw(playerSelection))
+          if (winner != null || GameLogic.checkDraw(playerSelection))
             WinnerDialog(
-              message: hasWinner
-                  ? '${currentPlayer == 1 ? 'Triple T' : widget.difficulty.playerOne} Wins!'
-                  : 'It\'s a Draw',
-              isDraw: !hasWinner && GameLogic.checkDraw(playerSelection),
-              image: hasWinner
-                  ? 'assets/images/win.png'
-                  : 'assets/images/refresh.png',
+              outcome: winner == 'player'
+                  ? GameOutcome.win
+                  : winner == 'computer'
+                      ? GameOutcome.lose
+                      : GameOutcome.draw,
+              playerName: widget.difficulty.playerOne,
               onReplay: () {
                 HapticFeedback.lightImpact();
                 final soundProvider =
@@ -622,18 +604,18 @@ class _GridTileState extends State<_GridTile>
   }
 }
 
+enum GameOutcome { win, lose, draw }
+
 class WinnerDialog extends StatelessWidget {
-  final String message;
-  final bool isDraw;
-  final String image;
+  final GameOutcome outcome;
+  final String playerName;
   final VoidCallback onReplay;
   final VoidCallback onExit;
 
   const WinnerDialog({
     Key? key,
-    required this.message,
-    required this.isDraw,
-    required this.image,
+    required this.outcome,
+    required this.playerName,
     required this.onReplay,
     required this.onExit,
   }) : super(key: key);
@@ -641,6 +623,27 @@ class WinnerDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
+
+    String title;
+    String message;
+    String image;
+    switch (outcome) {
+      case GameOutcome.win:
+        title = 'Winner! 🎉';
+        message = '$playerName Wins!';
+        image = 'assets/images/win.png';
+        break;
+      case GameOutcome.lose:
+        title = 'You Lost!';
+        message = 'Triple T Wins!';
+        image = 'assets/images/lost.png';
+        break;
+      case GameOutcome.draw:
+        title = 'Try Again';
+        message = 'It\'s a Draw';
+        image = 'assets/images/refresh.png';
+        break;
+    }
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -665,7 +668,7 @@ class WinnerDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              isDraw ? 'Try Again' : 'Winner! 🎉',
+              title,
               style: GoogleFonts.lemon(
                 fontSize: size.width * 0.07,
                 color: Colors.white,
@@ -681,7 +684,8 @@ class WinnerDialog extends StatelessWidget {
             AnimatedContainer(
               duration: const Duration(milliseconds: 500),
               curve: Curves.easeInOut,
-              transform: Matrix4.identity()..scale(isDraw ? 1.0 : 1.1),
+              transform: Matrix4.identity()
+                ..scale(outcome == GameOutcome.draw ? 1.0 : 1.1),
               child: Image.asset(
                 image,
                 width: size.width * 0.25,

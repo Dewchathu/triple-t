@@ -56,7 +56,7 @@ class _DifficultySelectionScreenState extends State<DifficultySelectionScreen>
     )..repeat();
 
     // Play background music
-    if (Provider.of<SoundProvider>(context, listen: false).isSoundOn) {
+    if (Provider.of<SoundProvider>(context, listen: false).isMusicOn) {
       FlameAudio.bgm.play('background_music.mp3', volume: 0.5);
     }
   }

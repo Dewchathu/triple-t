@@ -26,15 +26,6 @@ class _EntryScreenState extends State<EntryScreen>
   @override
   void initState() {
     super.initState();
-    final soundProvider = Provider.of<SoundProvider>(context, listen: false);
-    if (soundProvider.isMusicOn && !FlameAudio.bgm.isPlaying) {
-      FlameAudio.bgm
-          .play('music.ogg', volume: soundProvider.musicVolume)
-          .catchError((e) {
-        print('Error playing theme.mp3: $e');
-      });
-    }
-
     _titleController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -51,10 +42,6 @@ class _EntryScreenState extends State<EntryScreen>
 
   @override
   void dispose() {
-    // Only pause music if exiting the app, not on navigation
-    if (!Navigator.of(context).canPop()) {
-      FlameAudio.bgm.pause();
-    }
     _titleController.dispose();
     _waveController.dispose();
     super.dispose();

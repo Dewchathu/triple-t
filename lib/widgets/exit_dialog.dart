@@ -71,7 +71,7 @@ class ExitDialog {
                         icon: Icons.cancel,
                         onPressed: () {
                           if (Provider.of<SoundProvider>(context, listen: false)
-                              .isSoundOn) {
+                              .isMusicOn) {
                             FlameAudio.play('button_click.mp3', volume: 0.7);
                           }
                           Navigator.of(context).pop(false);
@@ -88,7 +88,7 @@ class ExitDialog {
                         icon: Icons.check,
                         onPressed: () {
                           if (Provider.of<SoundProvider>(context, listen: false)
-                              .isSoundOn) {
+                              .isMusicOn) {
                             FlameAudio.play('button_click.mp3', volume: 0.7);
                           }
                           SystemNavigator.pop();

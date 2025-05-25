@@ -50,7 +50,7 @@ class _CustomButtonState extends State<CustomButton>
   }
 
   void _playSound() {
-    if (Provider.of<SoundProvider>(context, listen: false).isSoundOn) {
+    if (Provider.of<SoundProvider>(context, listen: false).isMusicOn) {
       FlameAudio.play('button_click.mp3', volume: 0.7);
     }
   }

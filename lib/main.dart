@@ -7,40 +7,35 @@ import 'package:triple_t/screens/splash_screen.dart';
 
 void main() async {
   try {
-    // Disable runtime font fetching for GoogleFonts
     GoogleFonts.config.allowRuntimeFetching = false;
-
-    // Ensure Flutter bindings are initialized
     WidgetsFlutterBinding.ensureInitialized();
-
-    // // Initialize FlameAudio
-    // await FlameAudio.bgm.initialize();
-
-    // Preload all audio assets
+    FlameAudio.bgm.initialize();
     await FlameAudio.audioCache.loadAll([
-      'assets/audio/music.ogg',
-      'assets/audio/button_click.mp3',
-      'assets/audio/move.mp3',
-      'assets/audio/win.mp3',
-      'assets/audio/draw.mp3',
-      'assets/audio/hover.mp3',
-      'assets/audio/select.mp3',
-      'assets/audio/invalid.mp3',
-      'assets/audio/transition.mp3',
+      'theme.mp3',
+      'transition.mp3',
+      'button_click.mp3',
+      'move.mp3',
+      'win.mp3',
+      'draw.mp3',
+      'hover.mp3',
+      'select.mp3',
+      'invalid.mp3',
+      'lost.mp3',
     ]).catchError((e) {
       print('Error loading audio assets: $e');
     });
 
-    // Run the app with SoundProvider
+    final soundProvider = SoundProvider();
+    await soundProvider.initializeMusic();
+
     runApp(
       ChangeNotifierProvider(
-        create: (_) => SoundProvider(),
+        create: (_) => soundProvider,
         child: const MyApp(),
       ),
     );
   } catch (e) {
     print('Error in main: $e');
-    // Fallback: Run app without audio
     runApp(
       ChangeNotifierProvider(
         create: (_) => SoundProvider(),

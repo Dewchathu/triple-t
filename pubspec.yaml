@@ -4,7 +4,7 @@ description: "Tac tic toe Game"
 publish_to: 'none'
 
 
-version: 1.0.0+8
+version: 1.0.0+9
 
 
 environment:
@@ -23,6 +23,7 @@ dependencies:
   provider: ^6.1.2
   shared_preferences: ^2.2.3
   in_app_update: ^4.2.2
+  connectivity_plus: ^5.0.2
 
 dev_dependencies:
   flutter_test:

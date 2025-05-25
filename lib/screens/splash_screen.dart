@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,7 +36,6 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     final soundProvider = Provider.of<SoundProvider>(context, listen: false);
 
-    // Text animation (fade, scale, slide)
     _textController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2500),
@@ -53,7 +53,6 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _textController, curve: Curves.easeInOut),
     );
 
-    // Icon animation (scale)
     _iconController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
@@ -62,7 +61,6 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _iconController, curve: Curves.bounceOut),
     );
 
-    // Glow animation for text
     _glowController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -71,24 +69,22 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
     );
 
-    // Wave animation
     _waveController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 5),
     )..repeat();
 
-    // Play intro sound
     if (soundProvider.isEffectsOn) {
       _playIntroSound(soundProvider);
     }
 
-    // Check for updates and navigate
     _checkForUpdates();
   }
 
   Future<void> _playIntroSound(SoundProvider soundProvider) async {
     try {
-      await FlameAudio.play('select.mp3', volume: soundProvider.effectsVolume);
+      await FlameAudio.play('transition.mp3',
+          volume: soundProvider.effectsVolume);
       print('Played transition.mp3');
     } catch (e) {
       print('Failed to play transition.mp3: $e');
@@ -96,19 +92,31 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _checkForUpdates() async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      print('No internet connection; skipping update check');
+      _navigateToEntryScreen();
+      return;
+    }
+
     final prefs = await SharedPreferences.getInstance();
     final lastPrompt = prefs.getInt('lastUpdatePrompt') ?? 0;
     final now = DateTime.now().millisecondsSinceEpoch;
-    const oneDay = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+    const oneDay = 24 * 60 * 60 * 1000;
 
-    // Only prompt once per day
     if (now - lastPrompt < oneDay) {
       _navigateToEntryScreen();
       return;
     }
 
     try {
-      final updateInfo = await InAppUpdate.checkForUpdate();
+      final updateInfo = await InAppUpdate.checkForUpdate().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          print('Update check timed out');
+          throw Exception('Update check timed out');
+        },
+      );
       if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
         await prefs.setInt('lastUpdatePrompt', now);
         if (mounted) {
@@ -121,6 +129,12 @@ class _SplashScreenState extends State<SplashScreen>
       print('Error checking for updates: $e');
       _navigateToEntryScreen();
     }
+
+    Future.delayed(const Duration(seconds: 7), () {
+      if (mounted) {
+        _navigateToEntryScreen();
+      }
+    });
   }
 
   void _navigateToEntryScreen() {
@@ -137,10 +151,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    // Only pause music if exiting the app
-    if (!Navigator.of(context).canPop()) {
-      FlameAudio.bgm.pause();
-    }
     _textController.dispose();
     _iconController.dispose();
     _glowController.dispose();
@@ -155,7 +165,6 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // Wavy Gradient Background
           AnimatedBuilder(
             animation: _waveController,
             builder: (context, child) {
@@ -165,12 +174,10 @@ class _SplashScreenState extends State<SplashScreen>
               );
             },
           ),
-          // Content
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Animated Tic-Tac-Toe Icon
                 AnimatedBuilder(
                   animation: _iconScaleAnimation,
                   builder: (context, child) {
@@ -191,7 +198,6 @@ class _SplashScreenState extends State<SplashScreen>
                   },
                 ),
                 SizedBox(height: size.height * 0.04),
-                // Animated Text with Subtitle
                 AnimatedBuilder(
                   animation:
                       Listenable.merge([_textController, _glowController]),
@@ -230,7 +236,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   ),
                                 ),
                                 Text(
-                                  'Neon Tic-Tac-Toe',
+                                  'Tic-Tac-Toe',
                                   style: GoogleFonts.lemon(
                                     fontSize: size.width * 0.045,
                                     color: Colors.cyanAccent,

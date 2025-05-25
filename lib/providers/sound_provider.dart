@@ -1,11 +1,13 @@
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SoundProvider with ChangeNotifier {
+class SoundProvider extends ChangeNotifier {
   bool _isMusicOn = true;
   bool _isEffectsOn = true;
   double _musicVolume = 0.5;
   double _effectsVolume = 0.7;
+  bool _isMusicPlaying = false;
 
   SoundProvider() {
     _loadSettings();
@@ -16,34 +18,74 @@ class SoundProvider with ChangeNotifier {
   double get musicVolume => _musicVolume;
   double get effectsVolume => _effectsVolume;
 
-  // Backward compatibility
-  bool get isSoundOn => _isMusicOn && _isEffectsOn;
+  Future<void> initializeMusic() async {
+    print('Initializing music, isPlaying: $_isMusicPlaying');
+    if (_isMusicPlaying) {
+      await FlameAudio.bgm.stop().catchError((e) {
+        print('Error stopping existing music: $e');
+      });
+    }
+    if (_isMusicOn) {
+      await FlameAudio.bgm
+          .play('theme.mp3', volume: _musicVolume)
+          .catchError((e) {
+        print('Error playing theme.mp3: $e');
+      });
+      _isMusicPlaying = true;
+    }
+    notifyListeners();
+  }
 
-  void toggleMusic() {
+  Future<void> toggleMusic() async {
+    print('Toggling music: $_isMusicOn -> ${!_isMusicOn}');
     _isMusicOn = !_isMusicOn;
-    _saveSettings();
+    await _saveSettings();
+    if (_isMusicOn) {
+      if (_isMusicPlaying) {
+        await FlameAudio.bgm.stop().catchError((e) {
+          print('Error stopping music before replay: $e');
+        });
+      }
+      await FlameAudio.bgm
+          .play('theme.mp3', volume: _musicVolume)
+          .catchError((e) {
+        print('Error playing theme.mp3: $e');
+      });
+      _isMusicPlaying = true;
+    } else {
+      await FlameAudio.bgm.stop().catchError((e) {
+        print('Error stopping theme.mp3: $e');
+      });
+      _isMusicPlaying = false;
+    }
     notifyListeners();
   }
 
-  void toggleEffects() {
+  Future<void> toggleEffects() async {
     _isEffectsOn = !_isEffectsOn;
-    _saveSettings();
+    await _saveSettings();
     notifyListeners();
   }
 
-  void setMusicVolume(double volume) {
-    _musicVolume = volume.clamp(0.0, 1.0);
-    _saveSettings();
+  Future<void> setMusicVolume(double volume) async {
+    print('Setting music volume: $volume');
+    _musicVolume = volume;
+    await _saveSettings();
+    if (_isMusicOn && _isMusicPlaying) {
+      await FlameAudio.bgm.audioPlayer.setVolume(volume).catchError((e) {
+        print('Error setting music volume: $e');
+      });
+    }
     notifyListeners();
   }
 
-  void setEffectsVolume(double volume) {
-    _effectsVolume = volume.clamp(0.0, 1.0);
-    _saveSettings();
+  Future<void> setEffectsVolume(double volume) async {
+    _effectsVolume = volume;
+    await _saveSettings();
     notifyListeners();
   }
 
-  void _loadSettings() async {
+  Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     _isMusicOn = prefs.getBool('isMusicOn') ?? true;
     _isEffectsOn = prefs.getBool('isEffectsOn') ?? true;
@@ -52,7 +94,7 @@ class SoundProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void _saveSettings() async {
+  Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isMusicOn', _isMusicOn);
     await prefs.setBool('isEffectsOn', _isEffectsOn);
