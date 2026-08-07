@@ -2,7 +2,10 @@ import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:triple_t/l10n/generated/app_localizations.dart';
 import 'package:triple_t/providers/sound_provider.dart';
+import 'package:triple_t/providers/game_provider.dart';
 import 'package:triple_t/screens/splash_screen.dart';
 
 void main() async {
@@ -25,23 +28,10 @@ void main() async {
       print('Error loading audio assets: $e');
     });
 
-    final soundProvider = SoundProvider();
-    await soundProvider.initializeMusic();
-
-    runApp(
-      ChangeNotifierProvider(
-        create: (_) => soundProvider,
-        child: const MyApp(),
-      ),
-    );
+    runApp(const MyApp());
   } catch (e) {
     print('Error in main: $e');
-    runApp(
-      ChangeNotifierProvider(
-        create: (_) => SoundProvider(),
-        child: const MyApp(),
-      ),
-    );
+    runApp(const MyApp());
   }
 }
 
@@ -50,24 +40,42 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Triple-T',
-      themeMode: ThemeMode.dark,
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blueAccent,
-          brightness: Brightness.dark,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SoundProvider()..initializeMusic()),
+        ChangeNotifierProvider(create: (_) => GameProvider()),
+      ],
+      child: Consumer<GameProvider>(
+        builder: (context, gameProvider, child) {
+          return MaterialApp(
+            title: 'Triple-T',
+            locale: Locale(gameProvider.language),
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            themeMode: ThemeMode.dark,
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blueAccent,
+            brightness: Brightness.dark,
+          ),
+          textTheme: GoogleFonts.lemonTextTheme(ThemeData.dark().textTheme),
+          useMaterial3: true,
         ),
-        textTheme: GoogleFonts.lemonTextTheme(ThemeData.dark().textTheme),
-        useMaterial3: true,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+          textTheme: GoogleFonts.lemonTextTheme(),
+          useMaterial3: true,
+        ),
+        debugShowCheckedModeBanner: false,
+        home: const SplashScreen(),
+          );
+        },
       ),
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
-        textTheme: GoogleFonts.lemonTextTheme(),
-        useMaterial3: true,
-      ),
-      debugShowCheckedModeBanner: false,
-      home: const SplashScreen(),
     );
   }
 }

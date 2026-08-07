@@ -19,11 +19,13 @@ class SoundProvider extends ChangeNotifier {
   double get effectsVolume => _effectsVolume;
 
   Future<void> initializeMusic() async {
-    print('Initializing music, isPlaying: $_isMusicPlaying');
+    await _loadSettings();
+    print('Initializing music, isPlaying: $_isMusicPlaying, isMusicOn: $_isMusicOn');
     if (_isMusicPlaying) {
       await FlameAudio.bgm.stop().catchError((e) {
         print('Error stopping existing music: $e');
       });
+      _isMusicPlaying = false;
     }
     if (_isMusicOn) {
       await FlameAudio.bgm
@@ -91,6 +93,12 @@ class SoundProvider extends ChangeNotifier {
     _isEffectsOn = prefs.getBool('isEffectsOn') ?? true;
     _musicVolume = prefs.getDouble('musicVolume') ?? 0.5;
     _effectsVolume = prefs.getDouble('effectsVolume') ?? 0.7;
+    if (!_isMusicOn) {
+      await FlameAudio.bgm.stop().catchError((e) {
+        print('Error stopping music in _loadSettings: $e');
+      });
+      _isMusicPlaying = false;
+    }
     notifyListeners();
   }
 

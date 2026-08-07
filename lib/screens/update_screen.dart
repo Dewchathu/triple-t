@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:provider/provider.dart';
 import 'package:triple_t/providers/sound_provider.dart';
+import 'package:triple_t/providers/game_provider.dart';
 import 'package:triple_t/screens/entry_screen.dart';
 import 'package:triple_t/widgets/custom_button.dart';
 import 'package:triple_t/widgets/wavy_gradient_painter.dart';
@@ -65,6 +66,7 @@ class _UpdateScreenState extends State<UpdateScreen>
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     final soundProvider = Provider.of<SoundProvider>(context, listen: false);
+    final gameProvider = Provider.of<GameProvider>(context);
 
     return Scaffold(
       body: Stack(
@@ -75,7 +77,7 @@ class _UpdateScreenState extends State<UpdateScreen>
             builder: (context, child) {
               return CustomPaint(
                 size: Size.infinite,
-                painter: WavyGradientPainter(_waveController.value),
+                painter: WavyGradientPainter(_waveController.value, theme: gameProvider.theme),
               );
             },
           ),

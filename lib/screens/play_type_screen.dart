@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:triple_t/actions/moveto_next_screen.dart';
 import 'package:triple_t/providers/sound_provider.dart';
+import 'package:triple_t/providers/game_provider.dart';
 import 'package:triple_t/screens/entry_screen.dart';
 import 'package:triple_t/screens/player_selection.dart';
 import 'package:triple_t/widgets/custom_button.dart';
@@ -49,19 +50,36 @@ class _PlayTypeScreenState extends State<PlayTypeScreen>
   void dispose() {
     _titleController.dispose();
     _waveController.dispose();
-    if (Navigator.of(context).canPop()) {
-      FlameAudio.bgm.pause();
-    }
+    FlameAudio.bgm.pause();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
+    final gameProvider = Provider.of<GameProvider>(context);
 
     return PopScope(
       canPop: true,
       child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.home, color: Colors.white),
+              onPressed: () {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const EntryScreen()),
+                  (route) => false,
+                );
+              },
+            ),
+            const SizedBox(width: 10),
+          ],
+        ),
         body: Stack(
           children: [
             // Wavy Gradient Background
@@ -70,7 +88,7 @@ class _PlayTypeScreenState extends State<PlayTypeScreen>
               builder: (context, child) {
                 return CustomPaint(
                   size: Size.infinite,
-                  painter: WavyGradientPainter(_waveController.value),
+                  painter: WavyGradientPainter(_waveController.value, theme: gameProvider.theme),
                 );
               },
             ),
@@ -103,38 +121,29 @@ class _PlayTypeScreenState extends State<PlayTypeScreen>
                   ),
                   SizedBox(height: size.height * 0.06),
                   CustomButton(
-                    text: 'Single Play',
+                    text: gameProvider.t('single_play'),
                     icon: Icons.person,
                     onPressed: () {
                       moveToNextScreen(
                           context, const PlayerSelection(playType: 'single'));
                     },
-                    bottomColor: Colors.blue.shade900,
-                    darkColor: Colors.cyan.shade700,
-                    lightColor: Colors.cyan.shade300,
                   ),
                   SizedBox(height: size.height * 0.04),
                   CustomButton(
-                    text: 'Play With Friend',
+                    text: gameProvider.t('play_with_friend'),
                     icon: Icons.group,
                     onPressed: () {
                       moveToNextScreen(
                           context, const PlayerSelection(playType: 'double'));
                     },
-                    bottomColor: Colors.blue.shade900,
-                    darkColor: Colors.cyan.shade700,
-                    lightColor: Colors.cyan.shade300,
                   ),
                   SizedBox(height: size.height * 0.06),
                   CustomButton(
-                    text: 'Back',
+                    text: gameProvider.t('back'),
                     icon: Icons.arrow_back,
                     onPressed: () {
                       moveToNextScreen(context, const EntryScreen());
                     },
-                    bottomColor: Colors.blue.shade900,
-                    darkColor: Colors.cyan.shade700,
-                    lightColor: Colors.cyan.shade300,
                   ),
                 ],
               ),

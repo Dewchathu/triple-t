@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:triple_t/providers/sound_provider.dart';
+import 'package:triple_t/providers/game_provider.dart';
 import 'package:triple_t/screens/play_type_screen.dart';
 import 'package:triple_t/screens/settings_screen.dart';
 import 'package:triple_t/widgets/custom_button.dart';
@@ -51,6 +52,7 @@ class _EntryScreenState extends State<EntryScreen>
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     final soundProvider = Provider.of<SoundProvider>(context, listen: false);
+    final gameProvider = Provider.of<GameProvider>(context);
 
     return Scaffold(
       body: Stack(
@@ -61,7 +63,7 @@ class _EntryScreenState extends State<EntryScreen>
             builder: (context, child) {
               return CustomPaint(
                 size: Size.infinite,
-                painter: WavyGradientPainter(_waveController.value),
+                painter: WavyGradientPainter(_waveController.value, theme: gameProvider.theme),
               );
             },
           ),
@@ -97,7 +99,7 @@ class _EntryScreenState extends State<EntryScreen>
                 SizedBox(height: size.height * 0.06),
                 // Play Button
                 CustomButton(
-                  text: 'Play',
+                  text: gameProvider.t('play'),
                   icon: Icons.play_arrow,
                   onPressed: () {
                     HapticFeedback.lightImpact();
@@ -113,14 +115,11 @@ class _EntryScreenState extends State<EntryScreen>
                           builder: (context) => const PlayTypeScreen()),
                     );
                   },
-                  bottomColor: Colors.blue.shade900,
-                  darkColor: Colors.cyan.shade700,
-                  lightColor: Colors.cyan.shade300,
                 ),
                 SizedBox(height: size.height * 0.04),
                 // Settings Button
                 CustomButton(
-                  text: 'Settings',
+                  text: gameProvider.t('settings'),
                   icon: Icons.settings,
                   onPressed: () {
                     HapticFeedback.lightImpact();
@@ -136,14 +135,11 @@ class _EntryScreenState extends State<EntryScreen>
                           builder: (context) => const SettingsScreen()),
                     );
                   },
-                  bottomColor: Colors.blue.shade900,
-                  darkColor: Colors.cyan.shade700,
-                  lightColor: Colors.cyan.shade300,
                 ),
                 SizedBox(height: size.height * 0.04),
                 // Exit Button
                 CustomButton(
-                  text: 'Exit',
+                  text: gameProvider.t('exit'),
                   icon: Icons.exit_to_app,
                   onPressed: () async {
                     HapticFeedback.lightImpact();
@@ -159,9 +155,6 @@ class _EntryScreenState extends State<EntryScreen>
                       Navigator.of(context).pop();
                     }
                   },
-                  bottomColor: Colors.blue.shade900,
-                  darkColor: Colors.cyan.shade700,
-                  lightColor: Colors.cyan.shade300,
                 ),
               ],
             ),

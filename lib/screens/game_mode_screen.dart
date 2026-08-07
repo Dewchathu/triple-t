@@ -2,10 +2,13 @@ import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:triple_t/actions/moveto_next_screen.dart';
 import 'package:triple_t/providers/sound_provider.dart';
+import 'package:triple_t/providers/game_provider.dart';
 import 'package:triple_t/screens/difficulty_selection_screen.dart';
 import 'package:triple_t/screens/player_selection.dart';
+import 'package:triple_t/screens/entry_screen.dart';
 import 'package:triple_t/widgets/custom_button.dart';
 import 'package:triple_t/widgets/wavy_gradient_painter.dart';
 
@@ -66,17 +69,54 @@ class _GameModeScreenState extends State<GameModeScreen>
   void dispose() {
     _titleController.dispose();
     _waveController.dispose();
-    if (Navigator.of(context).canPop()) {
-      FlameAudio.bgm.pause();
-    }
+    FlameAudio.bgm.pause();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
+    final gameProvider = Provider.of<GameProvider>(context);
+
+    // Apply specific theme color cues to the loading indicator
+    Color splashAccent = Colors.cyanAccent;
+    switch (gameProvider.theme) {
+      case GameTheme.classic:
+        splashAccent = Colors.cyanAccent;
+        break;
+      case GameTheme.neon:
+        splashAccent = Colors.pinkAccent;
+        break;
+      case GameTheme.chalkboard:
+        splashAccent = Colors.white70;
+        break;
+      case GameTheme.retro:
+        splashAccent = Colors.amber;
+        break;
+      case GameTheme.glassmorphism:
+        splashAccent = Colors.white.withOpacity(0.6);
+        break;
+    }
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home, color: Colors.white),
+            onPressed: () {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const EntryScreen()),
+                (route) => false,
+              );
+            },
+          ),
+          const SizedBox(width: 10),
+        ],
+      ),
       body: Stack(
         children: [
           // Wavy Gradient Background
@@ -85,7 +125,7 @@ class _GameModeScreenState extends State<GameModeScreen>
             builder: (context, child) {
               return CustomPaint(
                 size: Size.infinite,
-                painter: WavyGradientPainter(_waveController.value),
+                painter: WavyGradientPainter(_waveController.value, theme: gameProvider.theme),
               );
             },
           ),
@@ -95,21 +135,25 @@ class _GameModeScreenState extends State<GameModeScreen>
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CircularProgressIndicator(
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Colors.cyanAccent),
-                        strokeWidth: 4,
+                      SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: LoadingIndicator(
+                          indicatorType: Indicator.ballRotateChase,
+                          colors: [splashAccent],
+                          strokeWidth: 4,
+                        ),
                       ),
-                      SizedBox(height: size.height * 0.02),
+                      SizedBox(height: size.height * 0.04),
                       Text(
-                        'Loading...',
+                        gameProvider.t('loading'),
                         style: GoogleFonts.lemon(
                           fontSize: size.width * 0.05,
                           color: Colors.white,
                           shadows: [
                             Shadow(
                               blurRadius: 10.0,
-                              color: Colors.cyanAccent.withOpacity(0.8),
+                              color: splashAccent.withOpacity(0.8),
                             ),
                           ],
                         ),
@@ -149,7 +193,7 @@ class _GameModeScreenState extends State<GameModeScreen>
                           Column(
                             children: [
                               Text(
-                                'Player 1',
+                                gameProvider.t('player_1'),
                                 style: GoogleFonts.lemon(
                                   fontSize: size.width * 0.05,
                                   color: Colors.white,
@@ -174,7 +218,7 @@ class _GameModeScreenState extends State<GameModeScreen>
                           Column(
                             children: [
                               Text(
-                                'Player 2',
+                                gameProvider.t('player_2'),
                                 style: GoogleFonts.lemon(
                                   fontSize: size.width * 0.05,
                                   color: Colors.white,
@@ -216,9 +260,6 @@ class _GameModeScreenState extends State<GameModeScreen>
                             ),
                           );
                         },
-                        bottomColor: Colors.blue.shade900,
-                        darkColor: Colors.cyan.shade700,
-                        lightColor: Colors.cyan.shade300,
                       ),
                       SizedBox(height: size.height * 0.04),
                       CustomButton(
@@ -235,9 +276,6 @@ class _GameModeScreenState extends State<GameModeScreen>
                             ),
                           );
                         },
-                        bottomColor: Colors.blue.shade900,
-                        darkColor: Colors.cyan.shade700,
-                        lightColor: Colors.cyan.shade300,
                       ),
                       SizedBox(height: size.height * 0.04),
                       CustomButton(
@@ -254,13 +292,10 @@ class _GameModeScreenState extends State<GameModeScreen>
                             ),
                           );
                         },
-                        bottomColor: Colors.blue.shade900,
-                        darkColor: Colors.cyan.shade700,
-                        lightColor: Colors.cyan.shade300,
                       ),
                       SizedBox(height: size.height * 0.06),
                       CustomButton(
-                        text: 'Back',
+                        text: gameProvider.t('back'),
                         icon: Icons.arrow_back,
                         onPressed: () {
                           moveToNextScreen(
@@ -268,9 +303,6 @@ class _GameModeScreenState extends State<GameModeScreen>
                             PlayerSelection(playType: widget.playType),
                           );
                         },
-                        bottomColor: Colors.blue.shade900,
-                        darkColor: Colors.cyan.shade700,
-                        lightColor: Colors.cyan.shade300,
                       ),
                     ],
                   ),
